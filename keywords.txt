@@ -1,0 +1,29 @@
+#######################################
+# Syntax Coloring Map
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+SCD40								KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+sensirion_i2c_init					KEYWORD2
+sensirion_i2c_release				KEYWORD2
+sensirion_i2c_read					KEYWORD2
+sensirion_i2c_write					KEYWORD2
+sensirion_sleep_usec				KEYWORD2
+scd40_probe							KEYWORD2
+scd40_read_measurement				KEYWORD2
+scd40_start_periodic_measurement	KEYWORD2
+scd40_stop_periodic_measurement		KEYWORD2
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+
+SCD40_I2C_ADDRESS					LITERAL1
