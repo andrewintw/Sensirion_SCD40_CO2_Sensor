@@ -219,31 +219,32 @@ void persistSettings() {
   }
 }
 
-void quickTest() {
-  stopPeriodicMeasurement();
+void reinit() {
+  uint16_t error;
+
+  error = scd4x.reinit();
+
+  if (error) {
+    printErrorMsg(__func__, error);
+  } else {
+    Serial.println(F("INFO> reinit"));
+  }
+}
+
+void configSCDx() {
   performFactoryReset();
 
-  getSerialNumber();
   //setAutomaticSelfCalibration(1);
-  getAutomaticSelfCalibration();
-  //performForcedRecalibration(824);
+  //performForcedRecalibration(800);
+  //setTemperatureOffset(25.5);
+  updateOpMode(1);
 
+  getSerialNumber();
+  getAutomaticSelfCalibration();
   getTemperatureOffset();
 
-  //-------------------------------
-  startPeriodicMeasurement();
-  for (int i = 0; i < 20; i++) {
-    readMeasurement();
-  }
-  stopPeriodicMeasurement();
-
-  //-------------------------------
-  performForcedRecalibration(824);
-  startPeriodicMeasurement();
-  for (int i = 0; i < 20; i++) {
-    readMeasurement();
-  }
-  stopPeriodicMeasurement();
+  persistSettings();
+  reinit();
 }
 
 void setup() {
@@ -255,136 +256,11 @@ void setup() {
   Wire.begin();
   scd4x.begin(Wire);
 
-  //quickTest();
-  showMenu();
-}
-
-void showMenu() {
-  String tmp = "";
-  Serial.print(
-    "\n"
-    "\t---------------------------------\n"
-    "\t\tSCD40 Menu\n"
-    "\t---------------------------------\n"
-    "\t1: Sensor Info\n"
-    "\t2: Read Measurement\n"
-    "\t3: Persist Settings\n"
-    "\t4: Factory Reset\n"
-  );
-
-  tmp = (ascState == 1) ? "(Enabled)\n" : "(Disabled)\n";
-  Serial.print(
-    "\t5: Toggle ASC (Automatic self-calibration) " + tmp
-  );
-
-
-  Serial.print(
-    "\t6: FRC (Forced Re-Calibration)\n"
-    "\t7: Set Temperature Offset\n"
-  );
-
-
-  tmp = (opMode == 1) ? "(High Performance)\n" : "(Low Power)\n";
-  Serial.print(
-    "\t8: Toggle operation mode " + tmp
-  );
-
-  Serial.println();
+  stopPeriodicMeasurement();
+  configSCDx();
+  startPeriodicMeasurement();
 }
 
 void loop() {
-  if (Serial.available() > 0) {
-    switch (Serial.read()) {
-      case '1': // Sensor Info
-        Serial.readStringUntil('\n'); // clean the buffer in serial
-        stopPeriodicMeasurement();
-        getSerialNumber();
-        getAutomaticSelfCalibration();
-        getTemperatureOffset();
-        break;
-
-      case '2': // Read Measurement
-        Serial.readStringUntil('\n'); // clean the buffer in serial
-        stopPeriodicMeasurement();
-        startPeriodicMeasurement();
-        Serial.println(F("INFO> press q to quit\n"));
-        for (;;) {
-          readMeasurement();
-          if (Serial.available() > 0) {
-            if (Serial.read() == 'q') {
-              stopPeriodicMeasurement();
-              break;
-            }
-          }
-        }
-        break;
-
-      case '3': // Persist Settings
-        Serial.readStringUntil('\n'); // clean the buffer in serial
-        stopPeriodicMeasurement();
-        persistSettings();
-        break;
-
-      case '4': // Factory Reset
-        Serial.readStringUntil('\n'); // clean the buffer in serial
-        stopPeriodicMeasurement();
-        performFactoryReset();
-        break;
-
-      case '5': // Toggle ASC (Automatic self-calibration)
-        Serial.readStringUntil('\n'); // clean the buffer in serial
-        stopPeriodicMeasurement();
-        getAutomaticSelfCalibration();
-
-        if (ascState == 1) {
-          Serial.println(F("INFO> disable ASC..."));
-        } else if (ascState == 0) {
-          Serial.println(F("INFO> enable ASC..."));
-        }
-        ascState = 1 - ascState;
-        setAutomaticSelfCalibration(ascState);
-        break;
-
-      case '6': // FRC (Forced Re-Calibration)
-        Serial.readStringUntil('\n'); // clean the buffer in serial
-        stopPeriodicMeasurement();
-        Serial.println(F("INFO> input FRC (ppm) from serial..."));
-
-        for (;;) {
-          if (Serial.available() > 0) {
-            String str = Serial.readStringUntil('\n');
-            int ppm = str.toInt();
-            //Serial.println(ppm, DEC);
-            performForcedRecalibration(ppm);
-            break;
-          }
-        }
-        break;
-
-      case '7': // Set Temperature Offset
-        Serial.readStringUntil('\n'); // clean the buffer in serial
-        stopPeriodicMeasurement();
-        Serial.println(F("INFO> input temperature offset from serial..."));
-
-        for (;;) {
-          if (Serial.available() > 0) {
-            String str = Serial.readStringUntil('\n');
-            float tOffset = str.toFloat();
-            //Serial.println((int)((tOffset * 65536.0) / 175.0));
-            setTemperatureOffset(tOffset);
-            break;
-          }
-        }
-        break;
-
-      case '8': // Toggle operation mode
-        opMode = 1 - opMode;
-        updateOpMode(opMode);
-        break;
-
-      default: // includes the case 'no input'
-        Serial.readStringUntil('\n'); // clean the buffer in serial
-        showMenu();
-    }
-  }
+  readMeasurement();
 }

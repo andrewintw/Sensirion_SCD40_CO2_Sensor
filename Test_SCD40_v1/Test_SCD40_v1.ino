@@ -113,8 +113,8 @@ void readMeasurement() {
   delay(update_interval);
 
   uint16_t co2;
-  uint16_t temperature;
-  uint16_t humidity;
+  float temperature;
+  float humidity;
 
   error = scd4x.readMeasurement(co2, temperature, humidity);
 
@@ -128,9 +128,9 @@ void readMeasurement() {
     Serial.print(F("Co2:"));
     Serial.print(co2);
     Serial.print(F("\tTemperature:"));
-    Serial.print(temperature * 175.0 / 65536.0 - 45.0);
+    Serial.print(temperature);
     Serial.print(F("\tHumidity:"));
-    Serial.println(humidity * 100.0 / 65536.0);
+    Serial.println(humidity);
   }
 }
 
