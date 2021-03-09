@@ -232,11 +232,11 @@ void reinit() {
 }
 
 void configSCDx() {
-  performFactoryReset();
+  //performFactoryReset();
 
-  //setAutomaticSelfCalibration(1);
-  //performForcedRecalibration(800);
-  //setTemperatureOffset(25.5);
+  setAutomaticSelfCalibration(1);
+  performForcedRecalibration(735);
+  setTemperatureOffset(3.21); // Toffset = Tscd4x_current - Texpect - Tprevious_offset
   updateOpMode(1);
 
   getSerialNumber();
