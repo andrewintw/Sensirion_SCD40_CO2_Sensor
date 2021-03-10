@@ -234,8 +234,8 @@ void reinit() {
 void configSCDx() {
   //performFactoryReset();
 
-  setAutomaticSelfCalibration(1);
-  performForcedRecalibration(735);
+  //setAutomaticSelfCalibration(1);
+  //performForcedRecalibration(405);
   setTemperatureOffset(3.21); // Toffset = Tscd4x_current - Texpect - Tprevious_offset
   updateOpMode(1);
 
