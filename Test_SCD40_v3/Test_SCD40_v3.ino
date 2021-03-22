@@ -270,6 +270,23 @@ bool getDataReadyStatus() {
   }
 }
 
+void performSelfTest() {
+  uint16_t error;
+  uint16_t sensorStatus;
+
+  scd4x.performSelfTest(sensorStatus);
+
+  if (error) {
+    printErrorMsg(__func__, error);
+  } else {
+    if (sensorStatus == 0x0) {
+      Serial.println(F("INFO> no malfunction detected"));
+    } else {
+      Serial.println(F("WARN> malfunction detected!!!"));
+    }
+  }
+}
+
 void quickTest() {
   stopPeriodicMeasurement();
   performFactoryReset();
@@ -338,6 +355,10 @@ void showMenu() {
   tmp = (opMode == 1) ? "(High Performance)\n" : "(Low Power)\n";
   Serial.print(
     "\t8: Toggle operation mode " + tmp
+  );
+
+  Serial.print(
+    "\t9: Perform Self Test\n"
   );
 
   Serial.println();
@@ -429,8 +450,14 @@ void loop() {
         break;
 
       case '8': // Toggle operation mode
+        stopPeriodicMeasurement();
         opMode = 1 - opMode;
         updateOpMode(opMode);
+        break;
+
+      case '9': // Perform Self Test
+        stopPeriodicMeasurement();
+        performSelfTest();
         break;
 
       default: // includes the case 'no input'

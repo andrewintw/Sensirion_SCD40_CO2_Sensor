@@ -270,20 +270,38 @@ bool getDataReadyStatus() {
   }
 }
 
+void performSelfTest() {
+  uint16_t error;
+  uint16_t sensorStatus;
+
+  scd4x.performSelfTest(sensorStatus);
+
+  if (error) {
+    printErrorMsg(__func__, error);
+  } else {
+    if (sensorStatus == 0x0) {
+      Serial.println(F("INFO> no malfunction detected"));
+    } else {
+      Serial.println(F("WARN> malfunction detected!!!"));
+    }
+  }
+}
+
 void configSCDx() {
   //performFactoryReset();
 
   //setAutomaticSelfCalibration(1);
   //performForcedRecalibration(405);
-  setTemperatureOffset(3.21); // Toffset = Tscd4x_current - Texpect - Tprevious_offset
-  updateOpMode(1);
+  //setTemperatureOffset(3.21); // Toffset = Tscd4x_current - Texpect - Tprevious_offset
+  updateOpMode(HIGH_PERF);  // { LOW_POWER, HIGH_PERF }
 
   getSerialNumber();
   getAutomaticSelfCalibration();
   getTemperatureOffset();
+  performSelfTest();
 
-  persistSettings();
-  reinit();
+  //persistSettings();
+  //reinit();
 }
 
 void setup() {

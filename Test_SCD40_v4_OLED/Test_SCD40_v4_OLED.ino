@@ -8,7 +8,12 @@ U8GLIB_SSD1306_128X64   u8g(13, 11, 10, 9); // SW SPI Com: SCK = 13, MOSI = 11, 
 
 SensirionI2CScd4x       scd4x;
 
-uint8_t     opMode          = 1;    // { 1:high performance mode,   0:Low Power operation}
+typedef enum {
+  LOW_POWER,
+  HIGH_PERF,
+} opMode_t;
+
+opMode_t    opMode          = HIGH_PERF;    // { 1:high performance mode,   0:Low Power operation}
 uint16_t    updateInterval  = 5000; // {5s:high performance mode, 30s:Low Power operation}
 int         ascState        = 1;    // { 1: enabled, 0: disabled }
 
@@ -16,13 +21,13 @@ uint16_t    co2;
 float       temperature;
 float       humidity;
 
-void updateOpMode(uint8_t mode) {
-  if (mode == 1) {
-    opMode = 1;
+void updateOpMode(opMode_t mode) {
+  if (mode == HIGH_PERF) {
+    opMode = HIGH_PERF;
     updateInterval = 5000;
     Serial.println(F("INFO> switch to High Performance Mode"));
   } else {
-    opMode = 0;
+    opMode = LOW_POWER;
     updateInterval = 30000;
     Serial.println(F("INFO> switch to Low Power Mode"));
   }
@@ -67,7 +72,7 @@ void startPeriodicMeasurement() {
   uint16_t error;
   String tmp = "";
 
-  if (opMode == 1) {
+  if (opMode == HIGH_PERF) {
     error = scd4x.startPeriodicMeasurement();
   } else {
     error = scd4x.startLowPowerPeriodicMeasurement();
@@ -76,7 +81,7 @@ void startPeriodicMeasurement() {
   if (error) {
     printErrorMsg(__func__, error);
   } else {
-    tmp = (opMode == 1) ? "(High Performance)" : "(Low Power)";
+    tmp = (opMode == HIGH_PERF) ? "(High Performance)" : "(Low Power)";
     Serial.print(F("INFO> start periodic measurement "));
     Serial.println(tmp);
   }
@@ -322,7 +327,6 @@ void resetOLED() {
 }
 
 void setup() {
-
   Serial.begin(115200);
   while (!Serial) {
     delay(100);
@@ -334,7 +338,6 @@ void setup() {
   stopPeriodicMeasurement();
   configSCDx();
   startPeriodicMeasurement();
-
 
   resetOLED();
 }
